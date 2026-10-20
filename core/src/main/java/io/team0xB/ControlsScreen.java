@@ -1,0 +1,91 @@
+package io.team0xB;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
+
+public class ControlsScreen extends ScreenAdapter {
+    private final Main game;
+    private final Stage stage;
+
+    // guards against two inputs in the same frame creating two game screens
+    private boolean started = false;
+
+    public ControlsScreen(final Main game) {
+        this.game = game;
+        Skin skin = game.getSkin();
+
+        stage = new Stage(new ExtendViewport(1280, 720));
+        Label heading = new Label("Controls", skin);
+        heading.setFontScale(1.5f);
+
+        Label controls = new Label(
+            "Move: W A S D or Arrow keys\n"
+                + "Back to menu: Esc",
+            skin);
+        controls.setAlignment(Align.center);
+
+        Label prompt = new Label("Press any key or click to start", skin);
+
+        Table table = new Table();
+        table.setFillParent(true);
+        table.add(heading).padBottom(40f).row();
+        table.add(controls).padBottom(80f).row();
+        table.add(prompt);
+        stage.addActor(table);
+
+        stage.addListener(new InputListener() {
+            // runs when any keyboard key is pressed down
+            @Override
+            public boolean keyDown(InputEvent event, int keycode) {
+                startGame();
+                return true;
+            }
+
+            // runs when any mouse button is pressed down
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                startGame();
+                return true;
+            }
+        });
+    }
+
+    private void startGame() {
+        if (started) return;
+        started = true;
+        game.switchScreen(new GameScreen(game));
+    }
+
+    @Override
+    public void show() {
+        // the stage must be the input processor or its listener never fires
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    @Override
+    public void render(float delta) {
+        Gdx.gl.glClearColor(0.08f, 0.10f, 0.15f, 1f);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        stage.act(delta);
+        stage.draw();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        stage.getViewport().update(width, height, true);
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+    }
+}
