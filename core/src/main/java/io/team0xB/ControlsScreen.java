@@ -24,8 +24,7 @@ public class ControlsScreen extends ScreenAdapter {
         Skin skin = game.getSkin();
 
         stage = new Stage(new ExtendViewport(1280, 720));
-        Label heading = new Label("Controls", skin);
-        heading.setFontScale(1.5f);
+        Label title = new Label("Controls", skin, "title");
 
         Label controls = new Label(
             "Move: W A S D or Arrow keys\n"
@@ -37,7 +36,7 @@ public class ControlsScreen extends ScreenAdapter {
 
         Table table = new Table();
         table.setFillParent(true);
-        table.add(heading).padBottom(40f).row();
+        table.add(title).padBottom(40f).row();
         table.add(controls).padBottom(80f).row();
         table.add(prompt);
         stage.addActor(table);

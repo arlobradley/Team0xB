@@ -25,9 +25,8 @@ public class MenuScreen extends ScreenAdapter {
         // 1280x720 is a virtual UI size, not pixels; ExtendViewport scales it to any window
         stage = new Stage(new ExtendViewport(1280, 720));
 
-        // STEP 1: text. A Label is just text drawn with the skin's "default" label style
-        Label title = new Label("Goose Escape", skin);
-        title.setFontScale(1.5f);
+        // STEP 1: text. A Label is just text drawn with the skin's "title" label style
+        Label title = new Label("Goose Escape", skin, "title");
 
         // STEP 2: buttons. Each uses the skin's "default" button style
         TextButton playButton = new TextButton("Play", skin);
