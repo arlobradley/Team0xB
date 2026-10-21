@@ -1,6 +1,7 @@
 package io.team0xB;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -10,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.IntSet;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class ControlsScreen extends ScreenAdapter {
@@ -18,6 +20,16 @@ public class ControlsScreen extends ScreenAdapter {
 
     // guards against two inputs in the same frame creating two game screens
     private boolean started = false;
+
+    private final IntSet ignoreKeys = IntSet.with(
+        Input.Keys.F11,
+        Input.Keys.SHIFT_LEFT,
+        Input.Keys.SHIFT_RIGHT,
+        Input.Keys.CONTROL_LEFT,
+        Input.Keys.CONTROL_RIGHT,
+        Input.Keys.ALT_LEFT,
+        Input.Keys.ALT_RIGHT
+    );
 
     public ControlsScreen(final Main game) {
         this.game = game;
@@ -45,6 +57,9 @@ public class ControlsScreen extends ScreenAdapter {
             // runs when any keyboard key is pressed down
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
+                if (ignoreKeys.contains(keycode)) {
+                    return false;
+                }
                 startGame();
                 return true;
             }
