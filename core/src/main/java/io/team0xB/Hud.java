@@ -19,7 +19,7 @@ public class Hud implements Disposable {
     private static final float TIMER_TOP_MARGIN = 16f;
 
     private final Stage stage = new Stage(new ExtendViewport(UiConstants.WIDTH, UiConstants.HEIGHT));
-    private Label timerLabel;
+    private final Label timerLabel;
     private int shownSeconds = -1;
 
     public Hud(Skin skin) {
