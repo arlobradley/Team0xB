@@ -8,6 +8,14 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import java.util.Locale;
+import com.badlogic.gdx.utils.Align;
 
 public class GameScreen extends ScreenAdapter {
     private final Main game;
@@ -21,8 +29,21 @@ public class GameScreen extends ScreenAdapter {
 
     private final Player player = new Player();
 
+    public static final float TIME_LIMIT_SECONDS = 300f;
+    // Separate Stage for HUD, drawn on top of the main game
+    private final Stage hudStage = new Stage(new ExtendViewport(UiConstants.WIDTH, UiConstants.HEIGHT));
+    private Label timerLabel;
+    private float timeLeft = TIME_LIMIT_SECONDS;
+    private int shownSeconds = -1;
+
+    private static final float TIMER_TEXT_WIDTH = 120f;
+    private static final float TIMER_PAD_VERTICAL = 8f;
+    private static final float TIMER_PAD_HORIZONTAL = 28f;
+    private static final float TIMER_TOP_MARGIN = 16f;
+
     public GameScreen(Main game) {
         this.game = game;
+        buildHud();
     }
 
     @Override
@@ -38,6 +59,7 @@ public class GameScreen extends ScreenAdapter {
             return;
         }
 
+        updateTimer(delta);
         player.update(delta);
 
         // centre the camera on the player, then apply the viewport (which also updates the camera)
@@ -52,6 +74,9 @@ public class GameScreen extends ScreenAdapter {
 
         drawGrid();
         drawPlayer();
+
+        hudStage.act(delta);
+        hudStage.draw();
     }
 
     private void drawGrid() {
@@ -86,13 +111,51 @@ public class GameScreen extends ScreenAdapter {
         shapes.end();
     }
 
+    private void buildHud() {
+        Skin skin = game.getSkin();
+
+        timerLabel = new Label("05:00", skin);
+        // Centre the text inside the fixed-width cell;
+        timerLabel.setAlignment(Align.center);
+
+        // White pixel from the Skin, tinted black at 50% opacity
+        Drawable transparentBlack = skin.newDrawable("white", new Color(0f, 0f, 0f, 0.5f));
+
+        // Small table whose background is drawn behind the timer, with padding around the text
+        Table timerBox = new Table();
+        timerBox.setBackground(transparentBlack);
+        timerBox.add(timerLabel)
+            .width(TIMER_TEXT_WIDTH)
+            .pad(TIMER_PAD_VERTICAL, TIMER_PAD_HORIZONTAL, TIMER_PAD_VERTICAL, TIMER_PAD_HORIZONTAL);
+
+        // Fullscreen table that pins the timer box to the top centre
+        Table root = new Table();
+        root.setFillParent(true);
+        root.top();
+        root.add(timerBox).padTop(TIMER_TOP_MARGIN);
+
+        hudStage.addActor(root);
+    }
+
+    private void updateTimer(float delta) {
+        timeLeft = Math.max(0f, timeLeft - delta);
+
+        int seconds = (int) Math.ceil(timeLeft);
+        if (seconds == shownSeconds) return;
+        shownSeconds = seconds;
+
+        timerLabel.setText(String.format(Locale.ROOT, "%02d:%02d", seconds / 60, seconds % 60));
+    }
+
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
+        hudStage.getViewport().update(width, height, true);
     }
 
     @Override
     public void dispose() {
         shapes.dispose();
+        hudStage.dispose();
     }
 }

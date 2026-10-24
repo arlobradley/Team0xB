@@ -17,12 +17,13 @@ public final class UiSkin {
     public static Skin create() {
         Skin skin = new Skin();
 
-        // UI is 720 units tall
-        float pixelScale = Gdx.graphics.getBackBufferHeight() / 720f;
+        float pixelScale = Math.min(
+            Gdx.graphics.getBackBufferWidth() / UiConstants.WIDTH,
+            Gdx.graphics.getBackBufferHeight() / UiConstants.HEIGHT);
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("fonts/AtkinsonHyperlegible-Regular.ttf"));
-        BitmapFont font = createFont(generator, 32, pixelScale);
-        BitmapFont titleFont = createFont(generator, 56, pixelScale);
+        BitmapFont font = createFont(generator, UiConstants.DEFAULT_FONT_SIZE, pixelScale);
+        BitmapFont titleFont = createFont(generator, UiConstants.TITLE_FONT_SIZE, pixelScale);
 
         generator.dispose();
 

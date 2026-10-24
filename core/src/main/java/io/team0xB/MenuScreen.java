@@ -22,8 +22,7 @@ public class MenuScreen extends ScreenAdapter {
         this.game = game;
         Skin skin = game.getSkin();
 
-        // 1280x720 is a virtual UI size, not pixels; ExtendViewport scales it to any window
-        stage = new Stage(new ExtendViewport(1280, 720));
+        stage = new Stage(new ExtendViewport(UiConstants.WIDTH, UiConstants.HEIGHT));
 
         // STEP 1: text. A Label is just text drawn with the skin's "title" label style
         Label title = new Label("Goose Escape", skin, "title");
@@ -54,8 +53,14 @@ public class MenuScreen extends ScreenAdapter {
         table.setFillParent(true);
 
         table.add(title).padBottom(60f).row();
-        table.add(playButton).width(320f).height(70f).padBottom(20f).row();
-        table.add(quitButton).width(320f).height(70f);
+        table.add(playButton)
+            .width(UiConstants.BUTTON_WIDTH)
+            .height(UiConstants.BUTTON_HEIGH)
+            .padBottom(20f)
+            .row();
+        table.add(quitButton)
+            .width(UiConstants.BUTTON_WIDTH)
+            .height(UiConstants.BUTTON_HEIGH);
 
         // STEP 5: nothing appears until the table is added to the stage
         stage.addActor(table);

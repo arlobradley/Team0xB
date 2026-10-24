@@ -35,7 +35,7 @@ public class ControlsScreen extends ScreenAdapter {
         this.game = game;
         Skin skin = game.getSkin();
 
-        stage = new Stage(new ExtendViewport(1280, 720));
+        stage = new Stage(new ExtendViewport(UiConstants.WIDTH, UiConstants.HEIGHT));
         Label title = new Label("Controls", skin, "title");
 
         Label controls = new Label(
