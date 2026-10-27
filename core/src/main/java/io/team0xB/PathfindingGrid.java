@@ -41,6 +41,9 @@ public class PathfindingGrid {
         }
     }
 
+    /**
+     * @param targetPos The coordinates of the pathfinding target (should always be the player.)
+     */
     public void calculateFlow(Vector2 targetPos) {
         //BFS for initial flowfield
         Vector2 target = new Vector2((float) Math.floor(targetPos.x / screenResolution),

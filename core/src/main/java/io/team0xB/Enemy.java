@@ -7,6 +7,14 @@ import com.badlogic.gdx.math.Vector2;
 
 // temporary shape rendering will replace with sprites later
 public class Enemy {
+    private float speed;
+    private float health;
+    private Vector2 position;
+
+    public Enemy(float health){
+        this.health = health;
+    }
+
     public void draw(ShapeRenderer renderer) {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(Color.CORAL);
@@ -16,5 +24,29 @@ public class Enemy {
 
     public void dispose(ShapeRenderer renderer){
         renderer.dispose();
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    public float getHealth() {
+        return health;
+    }
+
+    public void setHealth(float health) {
+        this.health = health;
+    }
+
+    public Vector2 getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector2 position) {
+        this.position = position;
     }
 }
