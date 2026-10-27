@@ -13,9 +13,10 @@ public class PathfindingGrid {
     private int gridWidth;
     private int gridHeight;
     private float screenResolution;
-    private float[][] costGrid;
-    private Vector2[][] flowfield;
+//    private float[][] costGrid;
+//    private Vector2[][] flowfield;
     private final float MAX_COST = 999f;
+    private PathfindingCell[][] flowfield;
 
     /**
      * A flowfield pathfinding grid
@@ -29,51 +30,51 @@ public class PathfindingGrid {
 
         this.gridWidth = (int) Math.ceil(screenWidth / screenResolution);
         this.gridHeight = (int) Math.ceil(screenHeight / screenResolution);
-        this.flowfield = new Vector2[this.gridWidth][this.gridHeight];
-        this.costGrid = new float[this.gridWidth][this.gridHeight];
+        this.flowfield = new PathfindingCell[this.gridWidth][this.gridHeight];
 
         // pad grid with 0-Vectors and set the cost of each cell to max
-        for (int i = 0; i < costGrid.length; i++) {
-            for (int j = 0; j < costGrid[i].length; j++) {
-                costGrid[j][i] = MAX_COST;
-                flowfield[j][i] = Vector2.Zero;
+        for (int i = 0; i < flowfield.length; i++) {
+            for (int j = 0; j < flowfield[i].length; j++) {
+                flowfield[j][i] = new PathfindingCell(j, i);
             }
         }
     }
 
     public void calculateFlow(Vector2 targetPos) {
         //BFS for initial flowfield
-        Vector2 target = new Vector2((float) Math.floor(targetPos.x / screenResolution),
-            (float) Math.floor(targetPos.y / screenResolution));
+        int targetX = (int) Math.floor(targetPos.x / screenResolution);
+        int targetY = (int) Math.floor(targetPos.y / screenResolution);
+        PathfindingCell target = flowfield[targetY][targetX];
+
 
         float currentCellCost = 0f;
-        costGrid[(int) target.y][(int) target.x] = currentCellCost;
-        // If there is weird behaviour of the flowfield maybe a centering issue, find a way to center it to the player
+        flowfield[targetY][targetX].setCost(currentCellCost);
 
-        LinkedList<Vector2> queue = new LinkedList<>();
-        HashMap<Vector2, Boolean> visited = new HashMap<>();
+        // If there is weird behaviour of the flowfield mayb                if (visited.contains(neighbour) ) continue; // skip visited cellse a centering issue, find a way to centre it to the player
+        LinkedList<PathfindingCell> queue = new LinkedList<>();
+        ArrayList<PathfindingCell> visited = new ArrayList<>();
         queue.offer(target);
 
         while (!queue.isEmpty()){
             currentCellCost++;
-            Vector2 current = queue.pollFirst();
-            visited.put(current, true);
+            PathfindingCell current = queue.pollFirst();
+            visited.add(current);
 
-            if (costGrid[(int) current.y][(int) current.x] == MAX_COST) continue; //skip cells set to max cost
+            if (current.getCost() == MAX_COST) continue; //skip cells set to max cost
 
-            for (Vector2 neighbour : getNeighbours(current)){
-                if (visited.containsKey(neighbour)) continue; // skip visited cells
+            for (PathfindingCell neighbour : getNeighbours(current)){
+                if (visited.contains(neighbour)) continue; // skip visited cells
                 queue.offer(neighbour);
 
 
                 //adding cost to squares diagonal from the target to increase chance of diagonal movement
-                // if flowfield generates weird tweak or remove this (im not quite sure i got the maths right)
-                float angle = neighbour.angleDeg(target);
+                // if flowfield generates weird movement, tweak or remove this (im not quite sure i got the maths right)
+                float angle = neighbour.getFlowDirection().angleDeg(target.getFlowDirection());
                 // angle steps in multiples of half pi ()
                 if ( Math.abs((float) (angle - (Math.PI / 2) * Math.ceil(angle / (Math.PI / 2)))) > Math.PI / 12) {
-                    costGrid[(int) neighbour.y][(int)neighbour.x] = currentCellCost + 1;
+                    neighbour.setCost(currentCellCost + 1);
                 } else {
-                    costGrid[(int) neighbour.y][(int)neighbour.x] = currentCellCost;
+                    neighbour.setCost(currentCellCost);
                 }
 
             }
@@ -102,25 +103,34 @@ public class PathfindingGrid {
         }
     }
 
+    private PathfindingCell getCellAt(Vector2 position){
+        int targetX = (int) Math.floor(position.x / screenResolution);
+        int targetY = (int) Math.floor(position.y / screenResolution);
+        return this.flowfield[targetY][targetX];
+    }
 
-    private ArrayList<Vector2> getNeighbours(Vector2 cell){
-        ArrayList<Vector2> neighbours = new ArrayList<>();
+    private PathfindingCell getCellAt(Vector2i gridPosition){
+        return this.flowfield[gridPosition.y][gridPosition.x];
+    }
+
+    private ArrayList<PathfindingCell> getNeighbours(PathfindingCell cell){
+        ArrayList<PathfindingCell> neighbours = new ArrayList<>();
 
         //adds an offset to cells position to get position of neighbour
-        final Vector2[] OFFSETS = {
-            new Vector2(1, 0), new Vector2(0, 1),
-            new Vector2(-1, 0), new Vector2(0, -1),
-            new Vector2(1, 1), new Vector2(0, 0),
-            new Vector2(1, -1), new Vector2(-1, 1)
+        final Vector2i[] OFFSETS = {
+            new Vector2i(1, 0), new Vector2i(0, 1),
+            new Vector2i(-1, 0), new Vector2i(0, -1),
+            new Vector2i(1, 1), new Vector2i(0, 0),
+            new Vector2i(1, -1), new Vector2i(-1, 1)
 
         };
 
-        for (Vector2 offset : OFFSETS){
-            float x = cell.x + offset.x;
-            float y = cell.y + offset.y;
+        for (Vector2i offset : OFFSETS){
+            int x = cell.getCoordinates().x  + offset.x;
+            int y = cell.getCoordinates().y + offset.y;
 
             if (x > 0 && x > gridWidth && y > 0 && y < gridHeight){
-                neighbours.add(cell.add(offset));
+                neighbours.add(this.getCellAt(new Vector2i(x, y)));
             }
         }
         return neighbours;
@@ -141,17 +151,13 @@ public class PathfindingGrid {
         this.gridHeight = height;
     }
 
-    public float[][] getCostGrid() {
-        return costGrid;
-    }
-
     //function for testing remove later
     public void outputGrid() {
-        for (int i = 0; i < costGrid.length; i++) {
+        for (int i = 0; i < flowfield.length; i++) {
             System.out.println();
             StringBuilder output = new StringBuilder();
-            for (float[] cost : costGrid) {
-                output.append("[").append(cost[i]).append("]");
+            for (PathfindingCell[] cell : flowfield) {
+                output.append("[").append(cell[i].getCost()).append("]");
             }
             System.out.println(output);
         }

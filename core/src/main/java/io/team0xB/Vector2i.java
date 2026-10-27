@@ -7,7 +7,7 @@ import java.util.Vector;
  */
 public class Vector2i {
     public final static Vector2i ZERO = new Vector2i(0, 0);
-    public final static Vector2i ONE = new Vector2i(0, 0);
+    public final static Vector2i ONE = new Vector2i(1, 1);
 
     public int x;
     public int y;
@@ -25,7 +25,7 @@ public class Vector2i {
     @Override
     public boolean equals(Object obj) {
         if (obj.getClass() == Vector2i.class) {
-            return obj.x == this.x && obj.y == this.y;
+            return ((Vector2i) obj).x == this.x && ((Vector2i) obj).y == this.y;
         }
         return false;
     }
