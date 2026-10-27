@@ -2,6 +2,7 @@ package io.team0xB;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
@@ -24,6 +25,19 @@ public class Main extends Game {
         if (old != null) {
             Gdx.app.postRunnable(old::dispose);
         }
+    }
+
+    @Override
+    public void render() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11)) {
+            if (Gdx.graphics.isFullscreen()) {
+                Gdx.graphics.setWindowedMode(1280, 720);
+            } else {
+                Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+            }
+        }
+
+        super.render();
     }
 
     @Override
