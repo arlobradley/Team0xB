@@ -19,11 +19,11 @@ public class GameScreen extends ScreenAdapter {
     private final ExtendViewport viewport = new ExtendViewport(VIEW_WIDTH, VIEW_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
 
-    private final Player player = new Player();
-
     public static final float GAME_DURATION_SECONDS = 300f;
     private final CountdownTimer timer = new CountdownTimer(GAME_DURATION_SECONDS);
     private final Hud hud;
+
+    private final GameWorld world = new GameWorld();
 
     public GameScreen(Main game) {
         this.game = game;
@@ -44,11 +44,11 @@ public class GameScreen extends ScreenAdapter {
         }
 
         timer.update(delta);
-        player.update(delta);
+        world.update(delta);
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
 
         // centre the camera on the player, then apply the viewport (which also updates the camera)
-        camera.position.set(player.position, 0f);
+        camera.position.set(world.getPlayer().position, 0f);
         viewport.apply();
 
         Gdx.gl.glClearColor(1f, 0.4f, 0.7f, 1f);
@@ -58,7 +58,7 @@ public class GameScreen extends ScreenAdapter {
         shapes.setProjectionMatrix(camera.combined);
 
         drawGrid();
-        drawPlayer();
+        world.render(shapes);
         hud.render(delta);
     }
 
@@ -74,23 +74,6 @@ public class GameScreen extends ScreenAdapter {
         shapes.setColor(0.85f, 0.30f, 0.55f, 1f);
         for (int x = minX; x <= maxX; x++) shapes.line(x, minY, x, maxY);
         for (int y = minY; y <= maxY; y++) shapes.line(minX, y, maxX, y);
-        shapes.end();
-    }
-
-    private void drawPlayer() {
-        shapes.begin(ShapeRenderer.ShapeType.Filled);
-
-        shapes.setColor(0.05f, 0.10f, 0.35f, 1f);
-        shapes.circle(player.position.x, player.position.y, Player.RADIUS, 24);
-
-        shapes.setColor(1f, 1f, 1f, 1f);
-        shapes.circle(
-            player.position.x + player.facing.x * Player.RADIUS * 0.7f,
-            player.position.y + player.facing.y * Player.RADIUS * 0.7f,
-            0.12f,
-            12
-            );
-
         shapes.end();
     }
 
