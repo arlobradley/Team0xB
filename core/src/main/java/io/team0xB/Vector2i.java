@@ -35,6 +35,6 @@ public class Vector2i {
     }
 
     public Vector2i sub(Vector2i other){
-        return new Vector2i(this.x + other.x, this.y + other.y);
+        return new Vector2i(this.x - other.x, this.y - other.y);
     }
 }

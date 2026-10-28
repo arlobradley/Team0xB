@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Vector;
 
 
 public class PathfindingGrid {
@@ -13,8 +14,6 @@ public class PathfindingGrid {
     private int gridWidth;
     private int gridHeight;
     private float screenResolution;
-//    private float[][] costGrid;
-//    private Vector2[][] flowfield;
     private final float MAX_COST = 999f;
     private PathfindingCell[][] flowfield;
 
@@ -53,7 +52,7 @@ public class PathfindingGrid {
         float currentCellCost = 0f;
         flowfield[targetY][targetX].setCost(currentCellCost);
 
-        // If there is weird behaviour of the flowfield mayb                if (visited.contains(neighbour) ) continue; // skip visited cellse a centering issue, find a way to centre it to the player
+        // If there is weird behaviour of the flowfield maybe a centering issue, find a way to centre it to the player
         LinkedList<PathfindingCell> queue = new LinkedList<>();
         ArrayList<PathfindingCell> visited = new ArrayList<>();
         queue.offer(target);
@@ -73,7 +72,7 @@ public class PathfindingGrid {
                 //adding cost to squares diagonal from the target to increase chance of diagonal movement
                 // if flowfield generates weird movement, tweak or remove this (im not quite sure i got the maths right)
                 float angle = neighbour.getFlowDirection().angleDeg(target.getFlowDirection());
-                // angle steps in multiples of half pi ()
+                // angle steps in multiples of half pi
                 if ( Math.abs((float) (angle - (Math.PI / 2) * Math.ceil(angle / (Math.PI / 2)))) > Math.PI / 12) {
                     neighbour.setCost(currentCellCost + 1);
                 } else {
@@ -88,34 +87,52 @@ public class PathfindingGrid {
         // Calculate flow directions for each cell of flowfield
         for (int i = 0; i < flowfield.length ; i++) {
             for (int j = 0; j < flowfield[i].length; j++) {
-                Vector2 currentFlowfieldCell = flowfield[j][i];
+                PathfindingCell currentFlowfieldCell = flowfield[j][i];
                 if ( currentFlowfieldCell == target ) continue;
                 float cheapestVal = MAX_COST;
 
                 // instantiating cheapest neighbour as self, if there is somehow no cheapest neighbour
-                Vector2 cheapestNeighbour = currentFlowfieldCell;
-                for (Vector2 neighbour : getNeighbours(currentFlowfieldCell)){
-                    float currentNeighbourCost = costGrid[(int)neighbour.y][(int)neighbour.x];
-                    if (currentNeighbourCost < cheapestVal) {
-                        cheapestVal = currentNeighbourCost;
+                PathfindingCell cheapestNeighbour = currentFlowfieldCell;
+                for (PathfindingCell neighbour : getNeighbours(currentFlowfieldCell)){
+                    if (neighbour.getCost() < cheapestVal) {
+                        cheapestVal = neighbour.getCost();
                         cheapestNeighbour = neighbour;
                     }
                 }
-                flowfield[j][i] = cheapestNeighbour.sub(currentFlowfieldCell); // flowfield direction
+
+                // Calculate unit vector to nearest flowfield
+                Vector2i vectorToCheapest = cheapestNeighbour.getCoordinates().sub(currentFlowfieldCell.getCoordinates());
+                double magnitudeVTC = Math.sqrt(Math.pow(vectorToCheapest.x, 2) + Math.pow(vectorToCheapest.y, 2));
+                float vtcX = (float) (vectorToCheapest.x / magnitudeVTC);
+                float vtcY = (float) (vectorToCheapest.y / magnitudeVTC);
+                Vector2 directionToCheapest = new Vector2(vtcX, vtcY);
+                flowfield[j][i].setFlowDirection(directionToCheapest);
             }
         }
     }
 
+    /**
+     * @param position a Vector2 position of an object in gamespace
+     * @return A PathfindingCell in the flowfield that provides the flow direction for objects at the input position.
+     */
     private PathfindingCell getCellAt(Vector2 position){
         int targetX = (int) Math.floor(position.x / screenResolution);
         int targetY = (int) Math.floor(position.y / screenResolution);
         return this.flowfield[targetY][targetX];
     }
 
+    /**
+     * @param gridPosition a Vector2i position of an object in the flowfield grid.
+     * @return The PathfindingCell located at the input position.
+     */
     private PathfindingCell getCellAt(Vector2i gridPosition){
         return this.flowfield[gridPosition.y][gridPosition.x];
     }
 
+    /**
+     * @param cell A PathfindingCell
+     * @return An ArrayList of neighbouring cells in the PathfindingGrid
+     */
     private ArrayList<PathfindingCell> getNeighbours(PathfindingCell cell){
         ArrayList<PathfindingCell> neighbours = new ArrayList<>();
 
@@ -137,6 +154,16 @@ public class PathfindingGrid {
             }
         }
         return neighbours;
+    }
+
+    /**
+     * Gets the flow direction of an object on the map
+     * @param position The position of the object on the map
+     * @return The flow direction of the object
+     */
+    public Vector2 getFlow(Vector2 position){
+        PathfindingCell cell = getCellAt(position);
+        return cell.getFlowDirection();
     }
 
     public int getGridWidth(){

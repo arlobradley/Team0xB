@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2;
 // temporary shape rendering will replace with sprites later
 public class Enemy {
     private float speed;
+    private Vector2 direction = Vector2.Zero;
     private float health;
     private Vector2 position;
 
@@ -17,9 +18,13 @@ public class Enemy {
 
     public void draw(ShapeRenderer renderer) {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
-        renderer.setColor(Color.CORAL);
+        renderer.setColor(Color.RED);
         renderer.circle(100, 100, 50);
         renderer.end();
+    }
+
+    public void updateDirection(PathfindingGrid gameGrid) {
+        this.direction = gameGrid.getFlow(this.position);
     }
 
     public void dispose(ShapeRenderer renderer){
@@ -48,5 +53,9 @@ public class Enemy {
 
     public void setPosition(Vector2 position) {
         this.position = position;
+    }
+
+    public Vector2 getDirection() {
+        return direction;
     }
 }
