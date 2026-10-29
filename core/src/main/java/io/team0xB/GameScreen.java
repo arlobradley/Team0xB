@@ -24,7 +24,8 @@ public class GameScreen extends ScreenAdapter {
     private final CountdownTimer timer = new CountdownTimer(GAME_DURATION_SECONDS);
     private final Hud hud;
 
-    private final GameWorld world = new GameWorld();
+    private final GameMap map = new GameMap();
+    private final GameWorld world = new GameWorld(map);
     private final EventManager eventManager = new EventManager(world);
 
     private final Vector2 aim = new Vector2();
@@ -32,10 +33,6 @@ public class GameScreen extends ScreenAdapter {
     public GameScreen(Main game) {
         this.game = game;
         this.hud = new Hud(game.getSkin());
-        world.addTriggerZone(new TriggerZone(
-            7f, 3f, 0.9f,
-            "You are late for your lecture, and the geese have noticed you.",
-            "Hold the left mouse button to scare them away. Keep moving!"));
     }
 
     @Override

@@ -9,6 +9,15 @@ public class GameWorld {
     private final Array<Projectile> projectiles = new Array<>();
     private final Array<TriggerZone> triggerZones = new Array<>();
 
+    public GameWorld(GameMap map) {
+        Array<GameMap.TriggerPoint> points = map.getTriggerPoints();
+
+        for (int i = 0; i < points.size; i++) {
+            GameMap.TriggerPoint point = points.get(i);
+            triggerZones.add(new TriggerZone(point.x(), point.y(), point.radius(), point.pages()));
+        }
+    }
+
     // aimPoint is the cursor position in world coordinates
     public void update(float delta, Vector2 aimPoint) {
         player.update(delta);
