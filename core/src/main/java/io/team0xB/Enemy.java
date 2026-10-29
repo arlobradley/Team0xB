@@ -5,11 +5,15 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.Random;
+
 // temporary shape rendering will replace with sprites later
 public class Enemy {
-    private float speed = 0.1f;
-    private Vector2 direction = Vector2.Zero;
+    private final Random random = new Random();
+    private final Vector2 direction = Vector2.Zero;
+
     private Vector2 position;
+    private float speed = 4f;
     private float health;
     private float size = 0.4f;
 
@@ -22,16 +26,20 @@ public class Enemy {
     public void draw(ShapeRenderer renderer) {
         renderer.begin(ShapeRenderer.ShapeType.Filled);
         renderer.setColor(Color.RED);
-        renderer.circle(this.position.x, this.position.y, size);
+        renderer.circle(position.x, position.y, size);
         renderer.end();
     }
 
-    public void update(PathfindingGrid gameGrid, float delta) {
-        this.direction = gameGrid.getFlow(this.position);
-        this.position.mulAdd(direction, speed * delta);
+    public void update(Vector2 playerPosition, float delta) {
+        if (this.health <= 0) this.dispose(new ShapeRenderer());
+        direction.x = playerPosition.x - position.x;
+        direction.y = playerPosition.y - position.y;
+        // convert direction to unit vector
+        float directionMag = (float) Math.sqrt(Math.pow(direction.x, 2) + Math.pow(direction.y, 2));
+        direction.x /= directionMag;
+        direction.y /= directionMag;
+        position.mulAdd(direction, speed * delta);
     }
-
-
 
     public void dispose(ShapeRenderer renderer){
         renderer.dispose();

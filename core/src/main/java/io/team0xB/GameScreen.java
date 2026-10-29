@@ -24,11 +24,8 @@ public class GameScreen extends ScreenAdapter {
 
     private final Player player = new Player();
 
-    private final float PATHFINDING_RESOLUTION = 1f;
-    private final PathfindingGrid pathfinding = new PathfindingGrid(VIEW_WIDTH, VIEW_HEIGHT, PATHFINDING_RESOLUTION);
     private final ArrayList<Enemy> enemies = new ArrayList<>();
-    //test enemy
-    private Enemy longboi = new Enemy(20f, new Vector2(2f, 2f));
+    private final EnemySpawner spawner = new EnemySpawner();
 
     public static final float GAME_DURATION_SECONDS = 300f;
     private final CountdownTimer timer = new CountdownTimer(GAME_DURATION_SECONDS);
@@ -37,9 +34,6 @@ public class GameScreen extends ScreenAdapter {
     public GameScreen(Main game) {
         this.game = game;
         this.hud = new Hud(game.getSkin());
-
-        //test remove later
-        this.enemies.add(longboi);
     }
 
     @Override
@@ -57,7 +51,7 @@ public class GameScreen extends ScreenAdapter {
 
         timer.update(delta);
         player.update(delta);
-        pathfinding.calculateFlow(player.position);
+        enemies.addAll(spawner.spawn(player.position, VIEW_WIDTH, VIEW_HEIGHT, delta));
         this.updateEnemies(delta);
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
 
@@ -111,7 +105,7 @@ public class GameScreen extends ScreenAdapter {
 
     private void updateEnemies(float delta){
         for (Enemy enemy : enemies){
-            enemy.update(pathfinding, delta);
+            enemy.update(player.position, delta);
         }
     }
 
