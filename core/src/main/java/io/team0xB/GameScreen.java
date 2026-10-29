@@ -32,6 +32,10 @@ public class GameScreen extends ScreenAdapter {
     public GameScreen(Main game) {
         this.game = game;
         this.hud = new Hud(game.getSkin());
+        world.addTriggerZone(new TriggerZone(
+            7f, 3f, 0.9f,
+            "You are late for your lecture, and the geese have noticed you.",
+            "Hold the left mouse button to scare them away. Keep moving!"));
     }
 
     @Override
@@ -47,14 +51,34 @@ public class GameScreen extends ScreenAdapter {
             return;
         }
 
-        timer.update(delta);
-        // Raw mouse position in pixels, then converted to world units through the camera and viewport
-        aim.set(Gdx.input.getX(), Gdx.input.getY());
-        viewport.unproject(aim);
-        world.update(delta, aim);
+        // After a stall, a huge delta would make everything jump; cap the step size
+        delta = Math.min(delta, 1f / 30f);
+
+        boolean frozen = eventManager.isGameFrozen();
+
+        if (!frozen) {
+            timer.update(delta);
+            aim.set(Gdx.input.getX(), Gdx.input.getY());
+            viewport.unproject(aim);
+            world.update(delta, aim);
+        }
+
+        hud.setTimeRemaining(timer.getWholeSecondsRemaining());
+        if (timer.isFinished()) {
+            // later: switch to the lose screen
+        }
 
         eventManager.update(delta);
-        Event activeEvent = eventManager.getActiveEvent();
+
+        CutsceneEvent cutscene = eventManager.getCutscene();
+
+        if (cutscene != null) {
+            hud.showTextbox(cutscene.getCurrentText());
+        } else {
+            hud.hideTextbox();
+        }
+
+        TimedEvent activeEvent = eventManager.getActiveEvent();
 
         if (activeEvent != null) {
             hud.showNotification(activeEvent.getMessage(), activeEvent.getSecondsRemaining());
@@ -62,20 +86,16 @@ public class GameScreen extends ScreenAdapter {
             hud.hideNotification();
         }
 
-        hud.setTimeRemaining(timer.getWholeSecondsRemaining());
-
-        // centre the camera on the player, then apply the viewport (which also updates the camera)
         camera.position.set(world.getPlayer().position, 0f);
         viewport.apply();
 
         Gdx.gl.glClearColor(1f, 0.4f, 0.7f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // tells the renderer to draw in world units, as seen through the camera
         shapes.setProjectionMatrix(camera.combined);
-
         drawGrid();
         world.render(shapes);
+
         hud.render(delta);
     }
 

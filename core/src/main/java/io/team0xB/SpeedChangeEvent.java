@@ -1,6 +1,6 @@
 package io.team0xB;
 
-public class SpeedChangeEvent extends Event {
+public class SpeedChangeEvent extends TimedEvent {
     private final float multiplier;
 
     public SpeedChangeEvent(String message, float multiplier, float durationSeconds) {
