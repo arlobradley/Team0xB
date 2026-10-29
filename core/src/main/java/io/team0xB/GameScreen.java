@@ -25,6 +25,7 @@ public class GameScreen extends ScreenAdapter {
     private final Hud hud;
 
     private final GameWorld world = new GameWorld();
+    private final EventManager eventManager = new EventManager(world);
 
     private final Vector2 aim = new Vector2();
 
@@ -51,6 +52,15 @@ public class GameScreen extends ScreenAdapter {
         aim.set(Gdx.input.getX(), Gdx.input.getY());
         viewport.unproject(aim);
         world.update(delta, aim);
+
+        eventManager.update(delta);
+        Event activeEvent = eventManager.getActiveEvent();
+
+        if (activeEvent != null) {
+            hud.showNotification(activeEvent.getMessage(), activeEvent.getSecondsRemaining());
+        } else {
+            hud.hideNotification();
+        }
 
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
 

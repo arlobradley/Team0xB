@@ -18,6 +18,8 @@ public class Player extends Entity {
 
     private boolean readyToAttack = false;
 
+    private float speedMultiplier = 1f;
+
     public Player() {
         super(0f, 0f, RADIUS);
         // Starts with the attack ready
@@ -38,7 +40,7 @@ public class Player extends Entity {
         if (!direction.isZero()) {
             direction.nor();
             facing.set(direction);
-            position.mulAdd(direction, SPEED * delta);
+            position.mulAdd(direction, SPEED * speedMultiplier * delta);
         }
     }
 
@@ -71,6 +73,10 @@ public class Player extends Entity {
             position.y + aimDirection.y * RADIUS,
             aimDirection
         );
+    }
+
+    public void setSpeedMultiplier(float multiplier) {
+        this.speedMultiplier = multiplier;
     }
 
     @Override
