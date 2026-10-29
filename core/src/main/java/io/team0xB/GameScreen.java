@@ -7,7 +7,10 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+
+import java.util.ArrayList;
 
 public class GameScreen extends ScreenAdapter {
     private final Main game;
@@ -21,6 +24,12 @@ public class GameScreen extends ScreenAdapter {
 
     private final Player player = new Player();
 
+    private final float PATHFINDING_RESOLUTION = 1f;
+    private final PathfindingGrid pathfinding = new PathfindingGrid(VIEW_WIDTH, VIEW_HEIGHT, PATHFINDING_RESOLUTION);
+    private final ArrayList<Enemy> enemies = new ArrayList<>();
+    //test enemy
+    private Enemy longboi = new Enemy(20f, new Vector2(2f, 2f));
+
     public static final float GAME_DURATION_SECONDS = 300f;
     private final CountdownTimer timer = new CountdownTimer(GAME_DURATION_SECONDS);
     private final Hud hud;
@@ -28,6 +37,9 @@ public class GameScreen extends ScreenAdapter {
     public GameScreen(Main game) {
         this.game = game;
         this.hud = new Hud(game.getSkin());
+
+        //test remove later
+        this.enemies.add(longboi);
     }
 
     @Override
@@ -45,6 +57,8 @@ public class GameScreen extends ScreenAdapter {
 
         timer.update(delta);
         player.update(delta);
+        pathfinding.calculateFlow(player.position);
+        this.updateEnemies(delta);
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
 
         // centre the camera on the player, then apply the viewport (which also updates the camera)
@@ -59,6 +73,7 @@ public class GameScreen extends ScreenAdapter {
 
         drawGrid();
         drawPlayer();
+        drawEnemies();
         hud.render(delta);
     }
 
@@ -93,6 +108,19 @@ public class GameScreen extends ScreenAdapter {
 
         shapes.end();
     }
+
+    private void updateEnemies(float delta){
+        for (Enemy enemy : enemies){
+            enemy.update(pathfinding, delta);
+        }
+    }
+
+    private void drawEnemies(){
+        for (Enemy enemy : enemies){
+            enemy.draw(shapes);
+        }
+    }
+
 
     @Override
     public void resize(int width, int height) {

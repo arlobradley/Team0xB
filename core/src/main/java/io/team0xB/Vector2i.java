@@ -1,5 +1,6 @@
 package io.team0xB;
 
+import java.util.Objects;
 import java.util.Vector;
 
 /**
@@ -24,10 +25,19 @@ public class Vector2i {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj.getClass() == Vector2i.class) {
+        if (obj == null) return false;
+        if (obj == this) return true;
+        if (obj instanceof Vector2i) {
             return ((Vector2i) obj).x == this.x && ((Vector2i) obj).y == this.y;
+        } else {
+            return false;
         }
-        return false;
+    }
+
+
+    @Override
+    public int hashCode(){
+       return 31 * Integer.hashCode(this.x) + Integer.hashCode(this.y);
     }
 
     public Vector2i add(Vector2i other){
