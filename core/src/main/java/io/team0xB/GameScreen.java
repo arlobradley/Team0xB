@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 public class GameScreen extends ScreenAdapter {
@@ -24,6 +25,8 @@ public class GameScreen extends ScreenAdapter {
     private final Hud hud;
 
     private final GameWorld world = new GameWorld();
+
+    private final Vector2 aim = new Vector2();
 
     public GameScreen(Main game) {
         this.game = game;
@@ -44,7 +47,11 @@ public class GameScreen extends ScreenAdapter {
         }
 
         timer.update(delta);
-        world.update(delta);
+        // Raw mouse position in pixels, then converted to world units through the camera and viewport
+        aim.set(Gdx.input.getX(), Gdx.input.getY());
+        viewport.unproject(aim);
+        world.update(delta, aim);
+
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
 
         // centre the camera on the player, then apply the viewport (which also updates the camera)

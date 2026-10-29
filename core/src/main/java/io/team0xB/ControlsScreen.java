@@ -40,6 +40,7 @@ public class ControlsScreen extends ScreenAdapter {
 
         Label controls = new Label(
             "Move: W A S D or Arrow keys\n"
+                + "Attack: hold left mouse button (aims at the cursor)\n"
                 + "Back to menu: Esc",
             skin);
         controls.setAlignment(Align.center);
