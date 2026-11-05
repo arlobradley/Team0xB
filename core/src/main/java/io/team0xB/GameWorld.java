@@ -8,6 +8,7 @@ public class GameWorld {
     private final Player player = new Player();
     private final Array<Projectile> projectiles = new Array<>();
     private final Array<TriggerZone> triggerZones = new Array<>();
+    private final Array<ItemEffect> effects = new Array<>();
 
     public GameWorld(GameMap map) {
         Array<GameMap.TriggerPoint> points = map.getTriggerPoints();
@@ -16,6 +17,9 @@ public class GameWorld {
             GameMap.TriggerPoint point = points.get(i);
             triggerZones.add(new TriggerZone(point.x(), point.y(), point.radius(), point.pages()));
         }
+
+        player.getInventory().add(new BurstItem());
+        player.getInventory().add(new OrbitItem());
     }
 
     // aimPoint is the cursor position in world coordinates
@@ -27,6 +31,15 @@ public class GameWorld {
             projectiles.add(shot);
         }
 
+        int slot = player.pollItemKey();
+        if (slot >= 0) {
+            player.getInventory().use(slot, this);
+        }
+
+        for (int i = 0; i < effects.size; i++) {
+            effects.get(i).update(delta);
+        }
+
         for (int i = 0; i < projectiles.size; i++) {
             projectiles.get(i).update(delta);
         }
@@ -35,6 +48,12 @@ public class GameWorld {
     }
 
     private void removeFinishedEntities() {
+        for (int i = effects.size - 1; i >= 0; i--) {
+            if (effects.get(i).isFinished()) {
+                effects.removeIndex(i);
+            }
+        }
+
         for (int i = 0; i < projectiles.size; i ++) {
             if (projectiles.get(i).isRemoved()) {
                 projectiles.removeIndex(i);
@@ -77,5 +96,13 @@ public class GameWorld {
 
     public Array<TriggerZone> getTriggerZones() {
         return triggerZones;
+    }
+
+    public void addProjectile(Projectile projectile) {
+        projectiles.add(projectile);
+    }
+
+    public void addEffect(ItemEffect effect) {
+        effects.add(effect);
     }
 }

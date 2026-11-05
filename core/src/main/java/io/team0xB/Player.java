@@ -20,6 +20,8 @@ public class Player extends Entity {
 
     private float speedMultiplier = 1f;
 
+    private final Inventory inventory = new Inventory();
+
     public Player() {
         super(0f, 0f, RADIUS);
         // Starts with the attack ready
@@ -29,6 +31,7 @@ public class Player extends Entity {
     @Override
     public void update(float delta) {
         fireCooldown.update(delta);
+        inventory.update(delta);
 
         direction.setZero();
 
@@ -77,6 +80,22 @@ public class Player extends Entity {
 
     public void setSpeedMultiplier(float multiplier) {
         this.speedMultiplier = multiplier;
+    }
+
+    public Inventory getInventory() {
+        return inventory;
+    }
+
+    // Returns the slot whose key (1 to 5) was pressed this frame, or -1 if none was
+    public int pollItemKey() {
+        for (int slot = 0; slot < Inventory.SLOT_COUNT; slot++) {
+            // The number keys have consecutive key codes, so slot 0 is key 1, slot 1 is key 2, and so on
+            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + slot)) {
+                return slot;
+            }
+        }
+
+        return -1;
     }
 
     @Override

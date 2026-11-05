@@ -61,6 +61,7 @@ public class GameScreen extends ScreenAdapter {
         }
 
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
+        hud.updateInventory(world.getPlayer().getInventory());
         if (timer.isFinished()) {
             // later: switch to the lose screen
         }
