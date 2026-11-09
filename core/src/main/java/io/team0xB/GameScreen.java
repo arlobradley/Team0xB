@@ -89,6 +89,10 @@ public class GameScreen extends ScreenAdapter {
         Gdx.gl.glClearColor(1f, 0.4f, 0.7f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        map.render(camera);
+        shapes.setProjectionMatrix(camera.combined);
+        world.render(shapes);
+
         shapes.setProjectionMatrix(camera.combined);
         drawGrid();
         world.render(shapes);
@@ -121,5 +125,6 @@ public class GameScreen extends ScreenAdapter {
     public void dispose() {
         shapes.dispose();
         hud.dispose();
+        map.dispose();
     }
 }
