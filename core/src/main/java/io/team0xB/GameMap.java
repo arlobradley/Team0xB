@@ -15,7 +15,7 @@ public class GameMap {
     private final OrthogonalTiledMapRenderer renderer;
 
     public GameMap() {
-        map = new TmxMapLoader().load("test.tmx");
+        map = new TmxMapLoader().load("campus.tmx");
         renderer = new OrthogonalTiledMapRenderer(map, 1f / 32f);
         // Temporary hard-coded layout; later this will be read from a map file
         triggerPoints.add(new TriggerPoint(
