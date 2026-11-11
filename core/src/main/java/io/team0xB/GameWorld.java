@@ -5,7 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class GameWorld {
-    private final Player player = new Player();
+    private final Player player = new Player(new GameMap());
     private final Array<Projectile> projectiles = new Array<>();
     private final Array<TriggerZone> triggerZones = new Array<>();
     private final Array<ItemEffect> effects = new Array<>();
