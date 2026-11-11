@@ -84,7 +84,14 @@ public class GameScreen extends ScreenAdapter {
             hud.hideNotification();
         }
 
-        camera.position.set(world.getPlayer().position, 0f);
+        //Clamping camera to map size
+        float halfWidth = viewport.getWorldWidth() / 2f;
+        float halfHeight = viewport.getWorldHeight() / 2f;
+        Vector2 position = world.getPlayer().position;
+        camera.position.set(
+            MathUtils.clamp(position.x, halfWidth, map.getWidth() - halfWidth),
+            MathUtils.clamp(position.y, halfHeight, map.getHeight() - halfHeight),
+            0f);
         viewport.apply();
 
         Gdx.gl.glClearColor(1f, 0.4f, 0.7f, 1f);
@@ -95,25 +102,9 @@ public class GameScreen extends ScreenAdapter {
         world.render(shapes);
 
         shapes.setProjectionMatrix(camera.combined);
-        drawGrid();
         world.render(shapes);
 
         hud.render(delta);
-    }
-
-    private void drawGrid() {
-        float halfWidth = viewport.getWorldWidth() / 2f;
-        float halfHeight = viewport.getWorldHeight() / 2f;
-        int minX = MathUtils.floor(camera.position.x - halfWidth);
-        int maxX = MathUtils.ceil(camera.position.x + halfWidth);
-        int minY = MathUtils.floor(camera.position.y - halfHeight);
-        int maxY = MathUtils.ceil(camera.position.y + halfHeight);
-
-        shapes.begin(ShapeRenderer.ShapeType.Line);
-        shapes.setColor(0.85f, 0.30f, 0.55f, 1f);
-        for (int x = minX; x <= maxX; x++) shapes.line(x, minY, x, maxY);
-        for (int y = minY; y <= maxY; y++) shapes.line(minX, y, maxX, y);
-        shapes.end();
     }
 
     @Override
