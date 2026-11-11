@@ -13,8 +13,8 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 public class GameScreen extends ScreenAdapter {
     private final Main game;
 
-    private static final float VIEW_WIDTH = 16f;
-    private static final float VIEW_HEIGHT = 9f;
+    private static final float VIEW_WIDTH = 24f;
+    private static final float VIEW_HEIGHT = 13.5f;
 
     private final OrthographicCamera camera = new OrthographicCamera();
     private final ExtendViewport viewport = new ExtendViewport(VIEW_WIDTH, VIEW_HEIGHT, camera);
