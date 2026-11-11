@@ -52,7 +52,7 @@ public class Player extends Entity {
 
         //Clamping player position within the bounds of the map
         position.x = MathUtils.clamp(position.x, RADIUS, map.getWidth() - RADIUS);
-        position.y = MathUtils.clamp(position.y, RADIUS, map.getWidth() - RADIUS);
+        position.y = MathUtils.clamp(position.y, RADIUS, map.getHeight() - RADIUS);
     }
 
     public Projectile tryFire(Vector2 aimPoint) {
