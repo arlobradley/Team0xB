@@ -1,5 +1,6 @@
 package io.team0xB;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
@@ -22,6 +23,12 @@ public abstract class Entity {
     // draws into a renderer the world has already begun
     public abstract void render(ShapeRenderer shapes);
 
+//     draws a part of a spritesheet, determined by an animation to a provided sprite batch.
+//     Should uncomment this once all other animated entities have sprite sheets.
+//     or maybe move to a AnimatedEntity class
+
+    // public abstract void render(Animator animator, SpriteBatch spriteBatch, float animTime, float delta);
+
     public float getRadius() {
         return radius;
     }
@@ -30,6 +37,11 @@ public abstract class Entity {
     public boolean overlaps(Entity other) {
         float combined = radius + other.radius;
         return position.dst2(other.position) <= combined * combined;
+    }
+
+    public boolean overlaps(Entity other, float padding) {
+        float combined = radius + other.radius;
+        return position.dst2(other.position) <= padding + combined * combined;
     }
 
     public void remove() {

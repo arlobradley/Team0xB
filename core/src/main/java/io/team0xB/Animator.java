@@ -17,6 +17,7 @@ import java.util.EnumMap;
  * - putting an animation into the animations Map
  */
 public class Animator {
+
     public enum AnimKey{
         ENEMY,
         PLAYER;
@@ -27,10 +28,12 @@ public class Animator {
     // when accessing values using string keys.
     private final EnumMap<AnimKey, Texture> textures = new EnumMap<>(AnimKey.class);
     private final EnumMap<AnimKey, Animation<TextureRegion>> animations = new EnumMap<>(AnimKey.class);
+    private float animationTimer = 0f;
 
     public Animator() {
         //Textures
         textures.put(AnimKey.ENEMY, new Texture(Gdx.files.internal("sprite-sheets/goose-sheet.png")));
+        textures.put(AnimKey.PLAYER, new Texture(Gdx.files.internal("sprite-sheets/player-sheet.png")));
 
         //Animations
 
@@ -40,6 +43,14 @@ public class Animator {
         int F_ROWS_ENEMY = 5;
         TextureRegion[] enemyFrames =  sheetToRegionArray(textures.get(AnimKey.ENEMY), F_ROWS_ENEMY, F_COLS_ENEMY, 1);
         animations.put(AnimKey.ENEMY, new Animation<>(EnemyFrameDuration, enemyFrames));
+
+        // Player Animation
+        float playerFrameDuration = 0.030f;
+        int F_COLS_PLAYER = 5;
+        int F_ROWS_PLAYER = 5;
+        TextureRegion[] playerFrames =  sheetToRegionArray(textures.get(AnimKey.PLAYER), F_ROWS_PLAYER, F_COLS_PLAYER, 1);
+        animations.put(AnimKey.PLAYER, new Animation<>(playerFrameDuration, playerFrames));
+
     }
 
     /**
@@ -74,13 +85,11 @@ public class Animator {
      * @param animation An enum AnimKey label that corresponds to an animation
      * @param offset The float offset of the animation relative to the global animation timer. Use with objects that
      *               have a lot of instances, like enemies or droppable items otherwise use 0.
-     * @param animTime A float valute of animation time progression.
-     *                 (How long has passed since all animations started playing)
      * @param delta A float value. The time since the last frame.
      * @return A TextureRegion. The current frame of the animation.
      */
-    public TextureRegion getNextFrame(AnimKey animation, float offset, float animTime, float delta){
-        return animations.get(animation).getKeyFrame(animTime + offset * delta, true);
+    public TextureRegion getNextFrame(AnimKey animation, float offset, float delta){
+        return animations.get(animation).getKeyFrame(animationTimer + offset * delta, true);
     }
 
 
@@ -91,6 +100,14 @@ public class Animator {
         for (Texture t: textures.values()){
             t.dispose();
         }
+    }
+
+    public float getAnimationTimer() {
+        return animationTimer;
+    }
+
+    public void updateAnimationTimer(float delta){
+        animationTimer += delta;
     }
 }
 

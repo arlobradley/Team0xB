@@ -23,13 +23,8 @@ public class GameScreen extends ScreenAdapter {
     private final ExtendViewport viewport = new ExtendViewport(VIEW_WIDTH, VIEW_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
     private final Animator animator = new Animator();
-    private float animationTimer = 0f;
     private final SpriteBatch spriteBatch = new SpriteBatch();
 
-    private final Player player = new Player();
-
-    private final ArrayList<Enemy> enemies = new ArrayList<>();
-    private final EnemySpawner spawner = new EnemySpawner();
 
     public static final float GAME_DURATION_SECONDS = 300f;
     private final CountdownTimer timer = new CountdownTimer(GAME_DURATION_SECONDS);
@@ -68,13 +63,11 @@ public class GameScreen extends ScreenAdapter {
             timer.update(delta);
             aim.set(Gdx.input.getX(), Gdx.input.getY());
             viewport.unproject(aim);
-            world.update(delta, aim);
+            world.update(delta, aim, VIEW_WIDTH, VIEW_HEIGHT);
         }
 
         timer.update(delta);
-        player.update(delta);
-        enemies.addAll(spawner.spawn(player.position, VIEW_WIDTH, VIEW_HEIGHT, delta));
-        this.updateEnemies(delta);
+        animator.updateAnimationTimer(delta);
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
         hud.updateInventory(world.getPlayer().getInventory());
         if (timer.isFinished()) {
@@ -107,21 +100,12 @@ public class GameScreen extends ScreenAdapter {
 
         map.render(camera);
         shapes.setProjectionMatrix(camera.combined);
-        world.render(shapes);
 
         shapes.setProjectionMatrix(camera.combined);
         spriteBatch.setProjectionMatrix(camera.combined);
 
         drawGrid();
-        world.render(shapes);
-
-        // Make sure no Shape based drawing happens in the section below (causes all sprites to fail to render)
-        spriteBatch.begin(); // All sprite + sprite animation drawing should be within this section
-        spriteBatch.enableBlending(); // blending is required because the sprites have transparency
-        drawEnemies(delta);
-        spriteBatch.disableBlending();
-        spriteBatch.end();
-
+        world.render(shapes, spriteBatch, animator, delta);
         hud.render(delta);
     }
 
@@ -138,19 +122,6 @@ public class GameScreen extends ScreenAdapter {
         for (int x = minX; x <= maxX; x++) shapes.line(x, minY, x, maxY);
         for (int y = minY; y <= maxY; y++) shapes.line(minX, y, maxX, y);
         shapes.end();
-    }
-
-    private void updateEnemies(float delta){
-        for (Enemy enemy : enemies){
-            enemy.update(player.position, delta);
-        }
-    }
-
-    private void drawEnemies(float delta){
-        animationTimer += delta;
-        for (Enemy enemy : enemies){
-            enemy.draw(animator, spriteBatch, animationTimer, delta);
-        }
     }
 
 

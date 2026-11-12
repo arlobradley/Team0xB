@@ -4,12 +4,13 @@ package io.team0xB;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 import java.util.Random;
 
 // temporary shape rendering will replace with sprites later
-public class Enemy {
+public class Enemy extends Entity {
     private final Random random = new Random();
     private final float animationOffset;
     private boolean flippedSprite;
@@ -23,6 +24,7 @@ public class Enemy {
 
 
     public Enemy(float health, Vector2 position){
+        super(position.x, position.y , 1.2f);
         this.animationOffset = random.nextFloat(0f, 48f);
         this.health = health;
         this.position = position;
@@ -33,14 +35,13 @@ public class Enemy {
      *
      * @param animator The games animator object.
      * @param spriteBatch The games sprite batch
-     * @param animTime The float value of how much time has passed since the animation started.
      * @param delta The float value of how much time has passed since the last frame.
      */
-    public void draw(Animator animator, SpriteBatch spriteBatch, float animTime , float delta) {
+
+    public void render(Animator animator, SpriteBatch spriteBatch,float delta) {
         TextureRegion spriteRegion = animator.getNextFrame(
             Animator.AnimKey.ENEMY,
             getAnimationOffset(),
-            animTime,
             delta
         );
 
@@ -62,7 +63,7 @@ public class Enemy {
      * @param delta A float value of how much time has passed since the last frame.
      */
     public void update(Vector2 playerPosition, float delta) {
-//        if (this.health <= 0) this; need to dispose of this class after death (being fed)
+        if (this.health <= 0) remove();
 
         direction.x = playerPosition.x - position.x;
         direction.y = playerPosition.y - position.y;
@@ -73,7 +74,6 @@ public class Enemy {
         position.mulAdd(direction, speed * delta);
 
         flippedSprite = playerPosition.x > position.x;
-
     }
 
     /**
@@ -91,10 +91,10 @@ public class Enemy {
     }
 
     /**
-     * @param health sets the health of the enemy to this float value.
+     * @param damage reduces the health of the enemy by this float value.
      */
-    public void setHealth(float health) {
-        this.health = health;
+    public void damage(float damage) {
+        this.health -= health;
     }
 
     /**
@@ -128,5 +128,15 @@ public class Enemy {
 
     public float getAnimationOffset() {
         return animationOffset;
+    }
+
+    @Override
+    public void update(float delta) {
+
+    }
+
+    @Override
+    public void render(ShapeRenderer shapes) {
+
     }
 }

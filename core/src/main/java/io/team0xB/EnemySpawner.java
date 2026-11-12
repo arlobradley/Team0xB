@@ -53,7 +53,7 @@ public class EnemySpawner {
                 spawnOffset.y += screenHeight;
             }
             spawnPositon.add(spawnOffset);
-            spawnedEnemies.add(new Enemy(10, spawnPositon));
+            spawnedEnemies.add(new Enemy(10f, spawnPositon));
         }
         return  spawnedEnemies;
     }
