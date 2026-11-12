@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import java.util.ArrayList;
 
 public class GameWorld {
-    private final Player player = new Player();
+    private final Player player = new Player(new GameMap());
     private final Array<Projectile> projectiles = new Array<>();
     private final Array<TriggerZone> triggerZones = new Array<>();
     private final Array<ItemEffect> effects = new Array<>();

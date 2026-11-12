@@ -3,6 +3,7 @@ package io.team0xB;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 
 public class Player extends Entity {
@@ -22,10 +23,13 @@ public class Player extends Entity {
 
     private final Inventory inventory = new Inventory();
 
-    public Player() {
-        super(0f, 0f, RADIUS);
+    private final GameMap map;
+
+    public Player(GameMap map) {
+        super(32f, 28f, RADIUS);
         // Starts with the attack ready
         fireCooldown.expire();
+        this.map = map;
     }
 
     @Override
@@ -45,6 +49,10 @@ public class Player extends Entity {
             facing.set(direction);
             position.mulAdd(direction, SPEED * speedMultiplier * delta);
         }
+
+        //Clamping player position within the bounds of the map
+        position.x = MathUtils.clamp(position.x, RADIUS, map.getWidth() - RADIUS);
+        position.y = MathUtils.clamp(position.y, RADIUS, map.getHeight() - RADIUS);
     }
 
     public Projectile tryFire(Vector2 aimPoint) {

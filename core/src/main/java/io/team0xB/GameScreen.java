@@ -5,26 +5,20 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
-import java.util.ArrayList;
-
 public class GameScreen extends ScreenAdapter {
     private final Main game;
 
-    private static final float VIEW_WIDTH = 16f;
-    private static final float VIEW_HEIGHT = 9f;
+    private static final float VIEW_WIDTH = 24f;
+    private static final float VIEW_HEIGHT = 13.5f;
 
     private final OrthographicCamera camera = new OrthographicCamera();
     private final ExtendViewport viewport = new ExtendViewport(VIEW_WIDTH, VIEW_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
-    private final Animator animator = new Animator();
-    private final SpriteBatch spriteBatch = new SpriteBatch();
-
 
     public static final float GAME_DURATION_SECONDS = 300f;
     private final CountdownTimer timer = new CountdownTimer(GAME_DURATION_SECONDS);
@@ -63,11 +57,9 @@ public class GameScreen extends ScreenAdapter {
             timer.update(delta);
             aim.set(Gdx.input.getX(), Gdx.input.getY());
             viewport.unproject(aim);
-            world.update(delta, aim, VIEW_WIDTH, VIEW_HEIGHT);
+            world.update(delta, aim);
         }
 
-        timer.update(delta);
-        animator.updateAnimationTimer(delta);
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
         hud.updateInventory(world.getPlayer().getInventory());
         if (timer.isFinished()) {
@@ -92,7 +84,14 @@ public class GameScreen extends ScreenAdapter {
             hud.hideNotification();
         }
 
-        camera.position.set(world.getPlayer().position, 0f);
+        //Clamping camera to map size
+        float halfWidth = viewport.getWorldWidth() / 2f;
+        float halfHeight = viewport.getWorldHeight() / 2f;
+        Vector2 position = world.getPlayer().position;
+        camera.position.set(
+            MathUtils.clamp(position.x, halfWidth, map.getWidth() - halfWidth),
+            MathUtils.clamp(position.y, halfHeight, map.getHeight() - halfHeight),
+            0f);
         viewport.apply();
 
         Gdx.gl.glClearColor(1f, 0.4f, 0.7f, 1f);
@@ -100,30 +99,13 @@ public class GameScreen extends ScreenAdapter {
 
         map.render(camera);
         shapes.setProjectionMatrix(camera.combined);
+        world.render(shapes);
 
         shapes.setProjectionMatrix(camera.combined);
-        spriteBatch.setProjectionMatrix(camera.combined);
+        world.render(shapes);
 
-        drawGrid();
-        world.render(shapes, spriteBatch, animator, delta);
         hud.render(delta);
     }
-
-    private void drawGrid() {
-        float halfWidth = viewport.getWorldWidth() / 2f;
-        float halfHeight = viewport.getWorldHeight() / 2f;
-        int minX = MathUtils.floor(camera.position.x - halfWidth);
-        int maxX = MathUtils.ceil(camera.position.x + halfWidth);
-        int minY = MathUtils.floor(camera.position.y - halfHeight);
-        int maxY = MathUtils.ceil(camera.position.y + halfHeight);
-
-        shapes.begin(ShapeRenderer.ShapeType.Line);
-        shapes.setColor(0.85f, 0.30f, 0.55f, 1f);
-        for (int x = minX; x <= maxX; x++) shapes.line(x, minY, x, maxY);
-        for (int y = minY; y <= maxY; y++) shapes.line(minX, y, maxX, y);
-        shapes.end();
-    }
-
 
     @Override
     public void resize(int width, int height) {
@@ -134,7 +116,6 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         shapes.dispose();
-        animator.dispose();
         hud.dispose();
         map.dispose();
     }
