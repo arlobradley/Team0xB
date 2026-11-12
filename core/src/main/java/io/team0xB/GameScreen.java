@@ -5,9 +5,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 import java.util.ArrayList;
@@ -21,6 +21,9 @@ public class GameScreen extends ScreenAdapter {
     private final OrthographicCamera camera = new OrthographicCamera();
     private final ExtendViewport viewport = new ExtendViewport(VIEW_WIDTH, VIEW_HEIGHT, camera);
     private final ShapeRenderer shapes = new ShapeRenderer();
+    private final Animator animator = new Animator();
+    private float animationTimer = 0f;
+    private final SpriteBatch spriteBatch = new SpriteBatch();
 
     private final Player player = new Player();
 
@@ -64,10 +67,17 @@ public class GameScreen extends ScreenAdapter {
 
         // tells the renderer to draw in world units, as seen through the camera
         shapes.setProjectionMatrix(camera.combined);
+        spriteBatch.setProjectionMatrix(camera.combined);
 
         drawGrid();
         drawPlayer();
-        drawEnemies();
+
+        spriteBatch.begin(); // All sprite + sprite animation drawing should be within this section
+        spriteBatch.enableBlending(); // blending is required because the sprites have transparency
+        drawEnemies(delta);
+        spriteBatch.disableBlending();
+        spriteBatch.end();
+
         hud.render(delta);
     }
 
@@ -109,9 +119,10 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void drawEnemies(){
+    private void drawEnemies(float delta){
+        animationTimer += delta;
         for (Enemy enemy : enemies){
-            enemy.draw(shapes);
+            enemy.draw(animator, spriteBatch, animationTimer, delta);
         }
     }
 
@@ -125,6 +136,7 @@ public class GameScreen extends ScreenAdapter {
     @Override
     public void dispose() {
         shapes.dispose();
+        animator.dispose();
         hud.dispose();
     }
 }
