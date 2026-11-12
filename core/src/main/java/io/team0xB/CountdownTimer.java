@@ -43,4 +43,8 @@ public class CountdownTimer {
     public int getWholeSecondsRemaining() {
         return (int) Math.ceil(remaining);
     }
+
+    public void expire() {
+        remaining = 0f;
+    }
 }

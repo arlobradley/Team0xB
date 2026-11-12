@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 
 import java.util.ArrayList;
@@ -34,6 +35,12 @@ public class GameScreen extends ScreenAdapter {
     private final CountdownTimer timer = new CountdownTimer(GAME_DURATION_SECONDS);
     private final Hud hud;
 
+    private final GameMap map = new GameMap();
+    private final GameWorld world = new GameWorld(map);
+    private final EventManager eventManager = new EventManager(world);
+
+    private final Vector2 aim = new Vector2();
+
     public GameScreen(Main game) {
         this.game = game;
         this.hud = new Hud(game.getSkin());
@@ -52,25 +59,61 @@ public class GameScreen extends ScreenAdapter {
             return;
         }
 
+        // After a stall, a huge delta would make everything jump; cap the step size
+        delta = Math.min(delta, 1f / 30f);
+
+        boolean frozen = eventManager.isGameFrozen();
+
+        if (!frozen) {
+            timer.update(delta);
+            aim.set(Gdx.input.getX(), Gdx.input.getY());
+            viewport.unproject(aim);
+            world.update(delta, aim);
+        }
+
         timer.update(delta);
         player.update(delta);
         enemies.addAll(spawner.spawn(player.position, VIEW_WIDTH, VIEW_HEIGHT, delta));
         this.updateEnemies(delta);
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
+        hud.updateInventory(world.getPlayer().getInventory());
+        if (timer.isFinished()) {
+            // later: switch to the lose screen
+        }
 
-        // centre the camera on the player, then apply the viewport (which also updates the camera)
-        camera.position.set(player.position, 0f);
+        eventManager.update(delta);
+
+        CutsceneEvent cutscene = eventManager.getCutscene();
+
+        if (cutscene != null) {
+            hud.showTextbox(cutscene.getCurrentText());
+        } else {
+            hud.hideTextbox();
+        }
+
+        TimedEvent activeEvent = eventManager.getActiveEvent();
+
+        if (activeEvent != null) {
+            hud.showNotification(activeEvent.getMessage(), activeEvent.getSecondsRemaining());
+        } else {
+            hud.hideNotification();
+        }
+
+        camera.position.set(world.getPlayer().position, 0f);
         viewport.apply();
 
         Gdx.gl.glClearColor(1f, 0.4f, 0.7f, 1f);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // tells the renderer to draw in world units, as seen through the camera
+        map.render(camera);
+        shapes.setProjectionMatrix(camera.combined);
+        world.render(shapes);
+
         shapes.setProjectionMatrix(camera.combined);
         spriteBatch.setProjectionMatrix(camera.combined);
 
         drawGrid();
-        drawPlayer();
+        world.render(shapes);
 
         // Make sure no Shape based drawing happens in the section below (causes all sprites to fail to render)
         spriteBatch.begin(); // All sprite + sprite animation drawing should be within this section
@@ -94,23 +137,6 @@ public class GameScreen extends ScreenAdapter {
         shapes.setColor(0.85f, 0.30f, 0.55f, 1f);
         for (int x = minX; x <= maxX; x++) shapes.line(x, minY, x, maxY);
         for (int y = minY; y <= maxY; y++) shapes.line(minX, y, maxX, y);
-        shapes.end();
-    }
-
-    private void drawPlayer() {
-        shapes.begin(ShapeRenderer.ShapeType.Filled);
-
-        shapes.setColor(0.05f, 0.10f, 0.35f, 1f);
-        shapes.circle(player.position.x, player.position.y, Player.RADIUS, 24);
-
-        shapes.setColor(1f, 1f, 1f, 1f);
-        shapes.circle(
-            player.position.x + player.facing.x * Player.RADIUS * 0.7f,
-            player.position.y + player.facing.y * Player.RADIUS * 0.7f,
-            0.12f,
-            12
-            );
-
         shapes.end();
     }
 
@@ -139,5 +165,6 @@ public class GameScreen extends ScreenAdapter {
         shapes.dispose();
         animator.dispose();
         hud.dispose();
+        map.dispose();
     }
 }
