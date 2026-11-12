@@ -72,6 +72,7 @@ public class GameScreen extends ScreenAdapter {
         drawGrid();
         drawPlayer();
 
+        // Make sure no Shape based drawing happens in the section below (causes all sprites to fail to render)
         spriteBatch.begin(); // All sprite + sprite animation drawing should be within this section
         spriteBatch.enableBlending(); // blending is required because the sprites have transparency
         drawEnemies(delta);
