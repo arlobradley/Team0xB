@@ -16,6 +16,8 @@ public class GameWorld {
     private final ArrayList<Enemy> enemies = new ArrayList<>();
     private final EnemySpawner spawner = new EnemySpawner();
 
+    private final GameStats stats = new GameStats();
+
     public GameWorld(GameMap map) {
         Array<GameMap.TriggerPoint> points = map.getTriggerPoints();
 
@@ -38,8 +40,8 @@ public class GameWorld {
         }
 
         int slot = player.pollItemKey();
-        if (slot >= 0) {
-            player.getInventory().use(slot, this);
+        if (slot >= 0 && player.getInventory().use(slot, this)) {
+            stats.recordItemUse();
         }
 
         for (int i = 0; i < effects.size; i++) {
@@ -139,5 +141,9 @@ public class GameWorld {
 
     public void addEffect(ItemEffect effect) {
         effects.add(effect);
+    }
+
+    public GameStats getStats() {
+        return stats;
     }
 }

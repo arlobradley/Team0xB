@@ -36,6 +36,10 @@ public class Hud implements Disposable {
     private static final float TEXTBOX_BORDER = 4f;
     private static final float TEXTBOX_PADDING = 28f;
 
+    private static final float COUNTER_MARGIN = 16f;
+    private static final float COUNTER_PADDING = 10f;
+    private static final float COUNTER_TEXT_WIDTH = 280f;
+
     private final Stage stage = new Stage(new ExtendViewport(UiConstants.WIDTH, UiConstants.HEIGHT));
     private final Label timerLabel;
     private final Label notificationLabel;
@@ -50,6 +54,11 @@ public class Hud implements Disposable {
     private final Drawable slotCooldownBackground;
     private int shownSeconds = -1;
     private String shownNotification = "";
+
+    private final Label eventsCounterLabel;
+    private final Label itemsCounterLabel;
+    private int shownEvents = -1;
+    private int shownItemsUsed = -1;
 
     public Hud(Skin skin) {
         Drawable transparentBlack = skin.newDrawable("white", new Color(0f, 0f, 0f, BACKGROUND_ALPHA));
@@ -79,6 +88,21 @@ public class Hud implements Disposable {
         topRoot.add(timerBox).padTop(TIMER_TOP_MARGIN).row();
         topRoot.add(notificationBox).padTop(NOTIFICATION_TOP_GAP);
         stage.addActor(topRoot);
+
+        eventsCounterLabel = new Label("Events: 0", skin);
+        itemsCounterLabel = new Label("Items used: 0", skin);
+
+        Table counterBox = new Table();
+        counterBox.setBackground(transparentBlack);
+        counterBox.pad(COUNTER_PADDING);
+        counterBox.add(eventsCounterLabel).width(COUNTER_TEXT_WIDTH).left().row();
+        counterBox.add(itemsCounterLabel).width(COUNTER_TEXT_WIDTH).left();
+
+        Table counterRoot = new Table();
+        counterRoot.setFillParent(true);
+        counterRoot.top().left();
+        counterRoot.add(counterBox).pad(COUNTER_MARGIN);
+        stage.addActor(counterRoot);
 
         // Slot backgrounds differ in brightness, not only hue: empty is faint, ready is dark, cooling down is grey
         slotEmptyBackground = skin.newDrawable("white", new Color(0f, 0f, 0f, 0.25f));
@@ -188,6 +212,17 @@ public class Hud implements Disposable {
 
     public void hideTextbox() {
         textboxRoot.setVisible(false);
+    }
+
+    public void setCounters(int eventsTriggered, int itemsUsed) {
+        if (eventsTriggered != shownEvents) {
+            shownEvents = eventsTriggered;
+            eventsCounterLabel.setText("Events: " + eventsTriggered);
+        }
+        if (itemsUsed != shownItemsUsed) {
+            shownItemsUsed = itemsUsed;
+            itemsCounterLabel.setText("Items used: " + itemsUsed);
+        }
     }
 
     public void render(float delta) {

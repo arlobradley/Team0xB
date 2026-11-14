@@ -61,6 +61,7 @@ public class EventManager {
 
         activeEvent = event;
         activeEvent.start(world);
+        world.getStats().recordEvent();
     }
 
     private void checkTriggerZones() {
@@ -73,6 +74,7 @@ public class EventManager {
 
             cutscene = new CutsceneEvent(zone.getPages());
             cutscene.start(world);
+            world.getStats().recordEvent();
 
             zone.remove();
             return;

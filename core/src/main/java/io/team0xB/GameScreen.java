@@ -55,7 +55,9 @@ public class GameScreen extends ScreenAdapter {
         // after a stall, a huge delta would make everything jump; cap the step size
         delta = Math.min(delta, 1f / 30f);
 
-        boolean frozen = eventManager.isGameFrozen();
+        // Freeze the game when the timer is finished, change to introduce proper game-over
+        boolean gameOver = timer.isFinished();
+        boolean frozen = eventManager.isGameFrozen() || gameOver;
 
         if (!frozen) {
             timer.update(delta);
@@ -68,11 +70,14 @@ public class GameScreen extends ScreenAdapter {
 
         hud.setTimeRemaining(timer.getWholeSecondsRemaining());
         hud.updateInventory(world.getPlayer().getInventory());
+        hud.setCounters(world.getStats().getEventsTriggered(), world.getStats().getItemsUsed());
         if (timer.isFinished()) {
             // later: switch to the lose screen
         }
 
-        eventManager.update(delta);
+        if (!gameOver) {
+            eventManager.update(delta);
+        }
 
         CutsceneEvent cutscene = eventManager.getCutscene();
         if (cutscene != null) {
